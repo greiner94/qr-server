@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const fs = require("fs");
 const fileUpload = require ('express-fileupload');
 const app = express();
@@ -13,9 +14,13 @@ const filePath = "qr.json";
 
 app.listen(PORT, function(){
     console.log(`server started on port ${PORT}...`);
+    console.log(path.resolve("/public"));
+    console.log(path.resolve(__dirname, "/public"));
+    console.log(__dirname + "/public");
 });
 
 app.post('/api/qr/:id', jsonParser, (req, res) => {
+    console.log('post');
     const userId = req.params.id;
     const descr = req.body.descr;
     const textString = req.body.textString;
@@ -57,6 +62,7 @@ app.post('/api/qr/:id', jsonParser, (req, res) => {
 });
    
 app.get("/api/qr/:id", function(req, res) {
+    console.log('get');
     const userId = req.params.id;
     const content = fs.readFileSync(filePath, "utf8");
     const qrArr = JSON.parse(content);
