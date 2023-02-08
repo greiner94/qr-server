@@ -6,7 +6,9 @@ const app = express();
 const jsonParser = express.json();
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
+
 const PORT = process.env.PORT || 5000;
+const SITE_PATH = process.env.SITE_PATH || path.join('http://localhost:5000/');
   
 app.use(express.static(__dirname + "/public"));
 app.use(fileUpload({}));
@@ -14,9 +16,6 @@ const filePath = "qr.json";
 
 app.listen(PORT, function(){
     console.log(`server started on port ${PORT}...`);
-    console.log(path.resolve("/public"));
-    console.log(path.resolve(__dirname, "/public"));
-    console.log(__dirname + "/public");
 });
 
 app.post('/api/qr/:id', jsonParser, (req, res) => {
@@ -32,7 +31,7 @@ app.post('/api/qr/:id', jsonParser, (req, res) => {
         return res.sendStatus(400);
     } 
 
-    let qr = {userId, descr, fileName};
+    let qr = {userId, descr, fileName: SITE_PATH + fileName};
 
     let data = fs.readFileSync(filePath, "utf8");
     let qrArr = JSON.parse(data);
@@ -44,7 +43,7 @@ app.post('/api/qr/:id', jsonParser, (req, res) => {
     fs.writeFileSync(filePath, data);
 
     try {
-        QRCode.toFile(__dirname + `/public/${fileName}`, textString, {
+        QRCode.toFile(__dirname + '/public/' + fileName, textString, {
             color: {
                 dark: color,
                 light: bgColor
@@ -58,7 +57,7 @@ app.post('/api/qr/:id', jsonParser, (req, res) => {
         return res.status(500).send(err);
     }
 
-    res.send(__dirname + `/public/${fileName}`);
+    res.send(SITE_PATH + fileName);
 });
    
 app.get("/api/qr/:id", function(req, res) {
@@ -67,13 +66,7 @@ app.get("/api/qr/:id", function(req, res) {
     const content = fs.readFileSync(filePath, "utf8");
     const qrArr = JSON.parse(content);
 
-    const qrList = qrArr.filter((qr) => qr.userId == userId)
-                        .map((qr) => {
-                            return {
-                                ...qr,
-                                fileName: `${__dirname}/public/${qr.fileName}`,
-                            };
-                        });
+    const qrList = qrArr.filter((qr) => qr.userId == userId);
 
     if(qrList.length){
         res.send(qrList);
@@ -105,7 +98,7 @@ app.delete("/api/qr/:id", jsonParser, function(req, res) {
         res.send(qr);
 
         try {
-            fs.unlinkSync(__dirname + `/public/${fileName}`);
+            fs.unlinkSync(fileName);
         } catch(err) {
             return res.status(500).send(err);
         }
@@ -124,7 +117,11 @@ app.get("/api/qr/", function(req, res) {
 app.delete("/api/qr/", function(req, res) {
 
     fs.writeFileSync(filePath, '[]');
-    fs.readdirSync(__dirname + '/public/').forEach(f => fs.unlinkSync(__dirname + `/public/${f}`));
+    fs.readdirSync(__dirname + '/public/').forEach(f => {
+        if (!f.endsWith('.html')) {
+            fs.unlinkSync(__dirname + `/public/${f}`);
+        }
+    });
     
     let data = fs.readFileSync(filePath, "utf8");
     res.send(data);
