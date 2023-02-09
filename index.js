@@ -12,6 +12,13 @@ const SITE_PATH = process.env.SITE_PATH || path.join('http://localhost:5000/');
   
 app.use(express.static(__dirname + "/public"));
 app.use(fileUpload({}));
+app.use((req, res, next) => {
+    res.append('Access-Control-Allow-Origin', ['*']);
+    res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.append('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
+
 const filePath = "qr.json";
 
 app.listen(PORT, function(){
@@ -56,8 +63,7 @@ app.post('/api/qr/:id', jsonParser, (req, res) => {
     } catch(err) {
         return res.status(500).send(err);
     }
-
-    res.send(SITE_PATH + fileName);
+    res.send(qr);
 });
    
 app.get("/api/qr/:id", function(req, res) {
