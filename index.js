@@ -54,7 +54,9 @@ app.post('/api/qr/:id', jsonParser, (req, res) => {
             color: {
                 dark: color,
                 light: bgColor
-              }
+              },
+              width: 220,
+              errorCorrectionLevel: 'H',
         }, (err) => {
             if (err) {
                 throw err;
