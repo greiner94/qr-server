@@ -32,6 +32,8 @@ app.post('/api/qr/:id', jsonParser, (req, res) => {
     const textString = req.body.textString;
     const bgColor = req.body.bgColor;
     const color = req.body.color;
+    const correctionLevel = req.body.correctionLevel || 'L';
+    const width = req.body.width || 220;
     const fileName = uuidv4() + '.png';
 
     if (!req.body || !userId || !textString || !descr) {
@@ -55,8 +57,8 @@ app.post('/api/qr/:id', jsonParser, (req, res) => {
                 dark: color,
                 light: bgColor
               },
-              width: 220,
-              errorCorrectionLevel: 'H',
+              width: width,
+              errorCorrectionLevel: correctionLevel,
         }, (err) => {
             if (err) {
                 throw err;
