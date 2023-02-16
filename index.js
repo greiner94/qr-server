@@ -13,10 +13,11 @@ const SITE_PATH = process.env.SITE_PATH || path.join('http://localhost:5000/');
   
 app.use(express.static(__dirname + "/public"));
 app.use(fileUpload({}));
-app.use(cors({
-    origin: ['https://fancy-pie-2565e2.netlify.app', '*'],
-    credentials: true,
-  }));
+app.use(cors());
+app.use((req, res, next) => {
+res.header("Access-Control-Allow-Origin", "*");
+next();
+});
 
 const filePath = "qr.json";
 
