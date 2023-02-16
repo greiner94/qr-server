@@ -7,10 +7,10 @@ const jsonParser = express.json();
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
 const cors = require('cors');
-
+const proxy = require('html2canvas-proxy');
 const PORT = process.env.PORT || 5000;
 const SITE_PATH = process.env.SITE_PATH || path.join('http://localhost:5000/');
-  
+
 app.use(express.static(__dirname + "/public"));
 app.use(fileUpload({}));
 app.use('/', proxy());
