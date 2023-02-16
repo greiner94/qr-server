@@ -6,6 +6,7 @@ const app = express();
 const jsonParser = express.json();
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
+const cors = require('cors');
 
 const PORT = process.env.PORT || 5000;
 const SITE_PATH = process.env.SITE_PATH || path.join('http://localhost:5000/');
@@ -18,6 +19,12 @@ app.use((req, res, next) => {
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();
 });
+const corsOptions ={
+    origin:'http://localhost:3000', 
+    credentials:true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200
+}
+app.use(cors(corsOptions));
 
 const filePath = "qr.json";
 
