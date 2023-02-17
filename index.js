@@ -41,9 +41,9 @@ app.post('/api/qr/ready/:id',  jsonParser, (req, res) => {
     const imageData = matches[2];
     const buffer = Buffer.from(imageData, 'base64');
     const fileName = uuidv4() + '.' + ext;
-    fs.writeFileSync('public/' + fileName, buffer);
+    fs.writeFileSync('public/readyqr' + fileName, buffer);
 
-    let qr = {userId, type, descr, fileName: path.join(SITE_PATH, 'readyQR', fileName)};
+    let qr = {userId, type, descr, fileName: path.join(SITE_PATH, 'readyqr', fileName)};
 
     let data = fs.readFileSync(readyFilePath, "utf8");
     let qrArr = JSON.parse(data);
@@ -95,7 +95,7 @@ app.delete("/api/qr/ready/:id", jsonParser, function(req, res) {
         fs.writeFileSync(readyFilePath, data);
         const fileName = fullfilePath.split('\\').at(-1);
         try {
-            fs.unlinkSync(__dirname + '/public/readyQR/' + fileName);
+            fs.unlinkSync(__dirname + '/public/readyqr/' + fileName);
             res.send(qr);
         } catch(err) {
             return res.status(500).send(err);
