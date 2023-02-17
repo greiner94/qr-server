@@ -6,8 +6,6 @@ const app = express();
 const jsonParser = express.json();
 const QRCode = require('qrcode');
 const { v4: uuidv4 } = require('uuid');
-const cors = require('cors');
-const proxy = require('html2canvas-proxy');
 const PORT = process.env.PORT || 5000;
 const SITE_PATH = process.env.SITE_PATH || path.join('http://localhost:5000/');
 
@@ -21,27 +19,113 @@ app.use(function(req, res, next) {
 app.use(express.static(__dirname + "/public"));
 
 const filePath = "qr.json";
+const readyFilePath = "qr-ready.json";
 
 app.listen(PORT, function(){
     console.log(`server started on port ${PORT}...`);
 });
+
+app.post('/api/qr/ready/:id',  jsonParser, (req, res) => {
+    const userId = req.params.id;
+    const type = req.body.type;
+    const descr = req.body.descr;
+    const dataUrl = req.body.dataUrl;
+
+    if (!userId|| !dataUrl || !descr || !type) {
+        return res.sendStatus(400);
+    } 
+
+    const regex = /^data:.+\/(.+);base64,(.*)$/;
+    const matches = dataUrl.match(regex);
+    const ext = matches[1];
+    const imageData = matches[2];
+    const buffer = Buffer.from(imageData, 'base64');
+    const fileName = uuidv4() + '.' + ext;
+    fs.writeFileSync(__dirname + '/public/readyQR/' + fileName, buffer);
+
+    let qr = {userId, type, descr, fileName: path.join(SITE_PATH, 'readyQR', fileName)};
+
+    let data = fs.readFileSync(readyFilePath, "utf8");
+    let qrArr = JSON.parse(data);
+    const id = qrArr.length ? Math.max.apply(Math, qrArr.map((obj) => obj.id)) : 0;
+    qr.id = id + 1;
+
+    qrArr.push(qr);
+    data = JSON.stringify(qrArr);
+    fs.writeFileSync(readyFilePath, data);
+    
+    res.send(qr);
+});
+
+app.get('/api/qr/ready/:id',  jsonParser, (req, res) => {
+    const userId = req.params.id;
+    const content = fs.readFileSync(readyFilePath, "utf8");
+    const qrArr = JSON.parse(content);
+
+    const qrList = qrArr.filter((qr) => qr.userId == userId);
+
+    if(qrList.length){
+        res.send(qrList);
+    }
+    else{
+        res.status(404).send();
+    }
+});
+
+app.delete("/api/qr/ready/:id", jsonParser, function(req, res) {
+       
+    const userId = req.params.id;
+    const imageId = req.body.id;
+    let data = fs.readFileSync(readyFilePath, "utf8");
+    let qrArr = JSON.parse(data);
+    let index = -1;
+    let fullfilePath = '';
+
+    qrArr.forEach((qr, ind) => {
+        if (qr.userId == userId && qr.id == imageId) {
+            fullfilePath = qr.fileName;
+            index = ind;
+        }
+    });
+
+    if(index > -1) {
+        const qr = qrArr.splice(index, 1)[0];
+
+        data = JSON.stringify(qrArr);
+        fs.writeFileSync(readyFilePath, data);
+        const fileName = fullfilePath.split('\\').at(-1);
+        try {
+            fs.unlinkSync(__dirname + '/public/readyQR/' + fileName);
+            res.send(qr);
+        } catch(err) {
+            return res.status(500).send(err);
+        }
+    }
+    else{
+        res.status(404).send();
+    }
+});
+
+
+//////
 
 app.post('/api/qr/:id', jsonParser, (req, res) => {
     console.log('post');
     const userId = req.params.id;
     const descr = req.body.descr;
     const textString = req.body.textString;
+    const type = req.body.type;
     const bgColor = req.body.bgColor;
     const color = req.body.color;
     const correctionLevel = req.body.correctionLevel || 'L';
     const width = req.body.width || 220;
     const fileName = uuidv4() + '.png';
 
-    if (!req.body || !userId || !textString || !descr) {
+    if (!req.body || !userId || !textString || !descr || !type) {
         return res.sendStatus(400);
     } 
 
-    let qr = {userId, descr, fileName: SITE_PATH + fileName};
+    let qr = {userId, type, descr, fileName: SITE_PATH + fileName};
 
     let data = fs.readFileSync(filePath, "utf8");
     let qrArr = JSON.parse(data);
