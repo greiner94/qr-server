@@ -85,6 +85,8 @@ app.delete("/api/qr/ready/:id", jsonParser, function(req, res) {
         if (qr.userId == userId && qr.id == imageId) {
             fullfilePath = qr.fileName;
             index = ind;
+            console.log(fullfilePath);
+            console.log(fullfilePath.split('/'));
         }
     });
 
@@ -93,7 +95,7 @@ app.delete("/api/qr/ready/:id", jsonParser, function(req, res) {
 
         data = JSON.stringify(qrArr);
         fs.writeFileSync(readyFilePath, data);
-        const fileName = fullfilePath.split('/').at(-1);
+        const fileName = fullfilePath.split('/')[fullfilePath.split('/').length - 1];
         try {
             fs.unlinkSync(__dirname + '/public/' + fileName);
             res.send(qr);
