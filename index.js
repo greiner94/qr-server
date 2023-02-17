@@ -40,8 +40,8 @@ app.post('/api/qr/ready/:id',  jsonParser, (req, res) => {
     const ext = matches[1];
     const imageData = matches[2];
     const buffer = Buffer.from(imageData, 'base64');
-    const fileName = 'abcd' + '.' + ext;
-    fs.writeFileSync(path.resolve('public', 'readyQR', fileName), buffer);
+    const fileName = uuidv4() + '.' + ext;
+    fs.writeFileSync(fileName, buffer);
 
     let qr = {userId, type, descr, fileName: path.join(SITE_PATH, 'readyQR', fileName)};
 
