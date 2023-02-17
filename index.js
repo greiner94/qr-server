@@ -93,7 +93,7 @@ app.delete("/api/qr/ready/:id", jsonParser, function(req, res) {
 
         data = JSON.stringify(qrArr);
         fs.writeFileSync(readyFilePath, data);
-        const fileName = fullfilePath.split('\\').at(-1);
+        const fileName = fullfilePath.split('/').at(-1);
         try {
             fs.unlinkSync(__dirname + '/public/' + fileName);
             res.send(qr);
