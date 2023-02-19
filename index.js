@@ -1,7 +1,6 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-const fileUpload = require ('express-fileupload');
 const app = express();
 const jsonParser = express.json();
 const QRCode = require('qrcode');
@@ -43,7 +42,7 @@ app.post('/api/qr/ready/:id',  jsonParser, (req, res) => {
     const fileName = uuidv4() + '.' + ext;
     fs.writeFileSync('public/' + fileName, buffer);
 
-    let qr = {userId, type, descr, fileName: path.join(SITE_PATH, fileName)};
+    let qr = {userId, type, descr, fileName: SITE_PATH + fileName};
 
     let data = fs.readFileSync(readyFilePath, "utf8");
     let qrArr = JSON.parse(data);
