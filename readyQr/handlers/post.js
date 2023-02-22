@@ -42,24 +42,24 @@ module.exports = function post(req, res) {
     res.send(qr);
 };
 
-function removeOldTempQr(userId) {
-    let data = fs.readFileSync(filePath, "utf8");
-    let qrArr = JSON.parse(data);
+// function removeOldTempQr(userId) {
+//     let data = fs.readFileSync(filePath, "utf8");
+//     let qrArr = JSON.parse(data);
 
-    const qrToDeleteArr = qrArr.filter((qrObj) => qrObj.userId === userId);
-    const qrToLeftArr = qrArr.filter((qrObj) => qrObj.userId !== userId);
+//     const qrToDeleteArr = qrArr.filter((qrObj) => qrObj.userId === userId);
+//     const qrToLeftArr = qrArr.filter((qrObj) => qrObj.userId !== userId);
 
-    if (qrToDeleteArr.length) {
-        data = JSON.stringify(qrToLeftArr);
-        fs.writeFileSync(filePath, data);
+//     if (qrToDeleteArr.length) {
+//         data = JSON.stringify(qrToLeftArr);
+//         fs.writeFileSync(filePath, data);
 
-        const qrFileNamesArr = qrToDeleteArr.map((qr) => qr.fileName.split('/')[qr.fileName.split('/').length - 1]);
-        qrFileNamesArr.forEach(fileName => {
-            try {
-                fs.unlinkSync('./public/' + fileName);
-            } catch (err) {
-                return res.status(500).send(err);
-            }
-        });
-    } 
-}
+//         const qrFileNamesArr = qrToDeleteArr.map((qr) => qr.fileName.split('/')[qr.fileName.split('/').length - 1]);
+//         qrFileNamesArr.forEach(fileName => {
+//             try {
+//                 fs.unlinkSync('./public/' + fileName);
+//             } catch (err) {
+//                 return res.status(500).send(err);
+//             }
+//         });
+//     } 
+// }
